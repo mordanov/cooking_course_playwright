@@ -5,7 +5,7 @@ import re
 from bs4 import BeautifulSoup, Tag
 from playwright.async_api import Page
 import config
-from gc.auth import ensure_logged_in
+from gcd.auth import ensure_logged_in
 
 
 async def parse(page: Page, url: str) -> dict:
@@ -129,7 +129,7 @@ async def parse(page: Page, url: str) -> dict:
             img_idx += 1
             ext = _img_ext(src)
             local = f"images/{iid}{ext}"
-            images.append({"id": iid, "url": src, "local_path": local, "status": "pending"})
+            images.append({"id": iid, "type": "image", "url": src, "local_path": local, "status": "pending"})
             img["src"] = local  # rewrite in stored HTML
 
         html_content = str(block)

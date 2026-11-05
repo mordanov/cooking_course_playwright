@@ -13,7 +13,7 @@ from pathlib import Path
 from playwright.async_api import async_playwright
 
 import config
-from gc import auth, crawler, lesson as lesson_mod, manifest as mf, media as media_mod, render
+from gcd import auth, crawler, lesson as lesson_mod, manifest as mf, media as media_mod, render
 
 # ── failure tracking ──────────────────────────────────────────────────────────
 

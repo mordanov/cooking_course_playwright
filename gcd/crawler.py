@@ -4,7 +4,7 @@ import asyncio
 import random
 from playwright.async_api import Page
 import config
-from gc.auth import ensure_logged_in
+from gcd.auth import ensure_logged_in
 
 
 async def _nav(page: Page, url: str):
