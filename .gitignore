@@ -1,0 +1,8 @@
+.env
+.auth/
+offline/
+recon/
+.venv/
+__pycache__/
+*.log
+*.pyc
