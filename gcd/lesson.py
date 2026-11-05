@@ -27,7 +27,13 @@ async def parse(page: Page, url: str) -> dict:
 
     raw_html = await page.content()
 
-    # click play inside every kinescope frame to trigger manifest load
+    # scroll to each kinescope iframe and click play to trigger manifest load
+    for iframe_el in await page.locator("iframe[src*='kinescope']").all():
+        try:
+            await iframe_el.scroll_into_view_if_needed(timeout=2000)
+            await page.wait_for_timeout(500)
+        except Exception:
+            pass
     for frame in page.frames[1:]:
         if "kinescope" not in frame.url:
             continue

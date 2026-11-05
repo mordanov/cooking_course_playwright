@@ -10,6 +10,8 @@ import sys
 import time
 from pathlib import Path
 
+sys.stdout.reconfigure(line_buffering=True)
+
 from playwright.async_api import async_playwright
 
 import config
@@ -97,12 +99,25 @@ async def run():
         lesson_count = 0
 
         for training in manifest["trainings"]:
+            if config.TRAINING_ID_FILTER and training["id"] != config.TRAINING_ID_FILTER:
+                continue
             tid = training["id"]
             print(f"\n=== Training {tid} ({training.get('title') or '?'}) ===")
 
-            title, lessons_raw = await crawler.get_training_info(page, training)
+            title, lessons_raw, sub_trainings = await crawler.get_training_info(page, training)
             if title:
                 training["title"] = title
+
+            # add newly discovered sub-trainings to the manifest (deduped)
+            existing_tids = {t["id"] for t in manifest["trainings"]}
+            for st in sub_trainings:
+                if st["id"] not in existing_tids and st["id"] != tid:
+                    manifest["trainings"].append({
+                        "id": st["id"], "url": st["url"], "title": "",
+                        "lesson_ids": [], "locked_lessons": [],
+                    })
+                    existing_tids.add(st["id"])
+                    print(f"  + sub-training {st['id']}")
 
             # partition accessible / locked
             accessible = [l for l in lessons_raw if not l.get("locked")]
