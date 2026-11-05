@@ -138,6 +138,23 @@ async def parse(page: Page, url: str) -> dict:
             images.append({"id": iid, "type": "image", "url": src, "local_path": local, "status": "pending"})
             img["src"] = local  # rewrite in stored HTML
 
+        # rewrite file links inside HTML blocks (PDFs, etc.)
+        for a in block.select("a[href]"):
+            href = a.get("href") or ""
+            if not _is_file_link(href):
+                continue
+            fname = _guess_filename(a, file_idx)
+            mid = f"file_{file_idx}"
+            file_idx += 1
+            media[mid] = {
+                "type": "file",
+                "src_url": href,
+                "filename": fname,
+                "local_path": f"files/{fname}",
+                "status": "pending",
+            }
+            a["href"] = f"files/{fname}"  # rewrite in stored HTML
+
         html_content = str(block)
         if html_content.strip():
             blocks.append({"type": "html", "content": html_content})
@@ -153,6 +170,18 @@ async def parse(page: Page, url: str) -> dict:
         "media": media,
         "images": images,
     }
+
+
+_FILE_EXTS = {".pdf", ".zip", ".docx", ".xlsx", ".pptx", ".doc", ".xls", ".rar", ".7z", ".mp3", ".wav"}
+
+
+def _is_file_link(href: str) -> bool:
+    if not href or href.startswith(("data:", "mailto:", "#", "javascript:")):
+        return False
+    if "/fileservice/file/download" in href:
+        return True
+    path = href.split("?")[0].lower()
+    return any(path.endswith(ext) for ext in _FILE_EXTS)
 
 
 def _clean_block(tag: Tag):
