@@ -166,6 +166,7 @@ async def parse(page: Page, url: str) -> dict:
         "title": title,
         "description": description,
         "content_hash": content_hash,
+        "parser_version": 2,   # bump when parse logic changes significantly
         "blocks": blocks,
         "media": media,
         "images": images,

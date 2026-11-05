@@ -145,15 +145,16 @@ async def run():
 
                 existing_entry = manifest["lessons"].get(lid)
 
-                # quick check: if we have a hash, fetch fresh HTML to compare
-                # shortcut: always re-parse to get fresh manifest URLs; skip if everything done
+                # Skip only when parser version matches AND all media is done AND files exist.
+                # parser_version bump forces a re-parse (e.g. after adding PDF detection).
+                _PARSER_VERSION = 2
                 all_done = (
                     existing_entry
+                    and existing_entry.get("parser_version") == _PARSER_VERSION
                     and all(m["status"] == "done" for m in existing_entry.get("media", {}).values())
                     and all(i["status"] == "done" for i in existing_entry.get("images", []))
                 )
                 if all_done:
-                    # still need to verify files exist
                     files_ok = all(
                         (lesson_dir / m["local_path"]).exists()
                         for m in existing_entry.get("media", {}).values()
@@ -172,22 +173,27 @@ async def run():
                     lesson_count += 1
                     continue
 
-                # merge: preserve done-status for unchanged media items
-                if existing_entry and existing_entry.get("content_hash") == parsed["content_hash"]:
-                    # content unchanged — carry forward statuses for matching media
+                # Carry forward done-status when the local file already exists.
+                # File existence (not content_hash) is the source of truth — avoids
+                # re-downloading large videos when we re-parse to pick up new media types.
+                if existing_entry:
                     for mid, item in parsed["media"].items():
                         prev = existing_entry.get("media", {}).get(mid, {})
                         if prev.get("status") == "done":
-                            item["status"] = "done"
-                            item["local_path"] = prev.get("local_path", item["local_path"])
+                            local = lesson_dir / prev.get("local_path", item["local_path"])
+                            if local.exists() and local.stat().st_size > 0:
+                                item["status"] = "done"
+                                item["local_path"] = prev["local_path"]
                     for img in parsed["images"]:
                         prev_img = next(
                             (i for i in existing_entry.get("images", []) if i["id"] == img["id"]),
                             None,
                         )
                         if prev_img and prev_img.get("status") == "done":
-                            img["status"] = "done"
-                            img["local_path"] = prev_img.get("local_path", img["local_path"])
+                            local = lesson_dir / prev_img.get("local_path", img["local_path"])
+                            if local.exists() and local.stat().st_size > 0:
+                                img["status"] = "done"
+                                img["local_path"] = prev_img["local_path"]
 
                 parsed["id"] = lid
                 parsed["training_id"] = tid
