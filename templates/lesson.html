@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% set assets_path = "../../" %}
+
+{% block title %}{{ lesson.title or lesson.id }}{% endblock %}
+
+{% block header %}
+<div class="breadcrumb">
+  <a href="../../index.html">Все курсы</a> /
+  <a href="../index.html">{{ training.title or training.id }}</a>
+</div>
+<h1>{{ lesson.title or lesson.id }}</h1>
+{% if lesson.description %}
+<p style="color:#555; margin-top:.25rem">{{ lesson.description }}</p>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="lesson-content">
+{% for block in blocks %}
+  {% if block.type == "html" %}
+    {{ block.content | safe }}
+  {% elif block.type == "video" %}
+    {% if block.failed %}
+      <div class="media-failed">
+        Видео недоступно офлайн.
+        <a href="{{ block.original_url }}" target="_blank">Открыть оригинал</a>
+      </div>
+    {% else %}
+      <video controls preload="metadata">
+        <source src="{{ block.src }}">
+        Ваш браузер не поддерживает HTML5 видео.
+      </video>
+    {% endif %}
+  {% elif block.type == "audio" %}
+    {% if block.failed %}
+      <div class="media-failed">
+        Аудио недоступно.
+        <a href="{{ block.original_url }}" target="_blank">Открыть оригинал</a>
+      </div>
+    {% else %}
+      <audio controls>
+        <source src="{{ block.src }}">
+      </audio>
+    {% endif %}
+  {% elif block.type == "file" %}
+    {% if block.failed %}
+      <div class="media-failed">
+        Файл недоступен.
+        <a href="{{ block.original_url }}" target="_blank">Открыть оригинал</a>
+      </div>
+    {% else %}
+      <a class="file-link" href="{{ block.src }}" download>⬇ {{ block.text }}</a>
+    {% endif %}
+  {% endif %}
+{% endfor %}
+</div>
+{% endblock %}
+
+{% block nav %}
+<nav class="nav-lessons">
+  {% if prev %}
+    <a href="../{{ prev.id }}/index.html">← {{ prev.title or prev.id }}</a>
+  {% else %}
+    <span></span>
+  {% endif %}
+  {% if next %}
+    <a href="../{{ next.id }}/index.html">{{ next.title or next.id }} →</a>
+  {% else %}
+    <span></span>
+  {% endif %}
+</nav>
+{% endblock %}

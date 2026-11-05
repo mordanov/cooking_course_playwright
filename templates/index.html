@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% set assets_path = "" %}
+
+{% block title %}Все курсы{% endblock %}
+
+{% block header %}
+<h1>Все курсы</h1>
+{% endblock %}
+
+{% block content %}
+<ul class="training-list">
+{% for t in trainings %}
+  <li><a href="{{ t.id }}/index.html">{{ t.title or t.id }}</a></li>
+{% endfor %}
+</ul>
+{% endblock %}

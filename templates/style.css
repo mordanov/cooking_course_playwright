@@ -1,0 +1,82 @@
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  color: #1a1a1a;
+  background: #f8f8f6;
+}
+
+a { color: #2563eb; }
+a:visited { color: #7c3aed; }
+
+.page { max-width: 860px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
+
+header { margin-bottom: 2rem; border-bottom: 1px solid #ddd; padding-bottom: 1rem; }
+header h1 { margin: 0 0 .25rem; font-size: 1.4rem; }
+header .breadcrumb { font-size: .85rem; color: #666; }
+header .breadcrumb a { color: #666; }
+
+h2 { font-size: 1.5rem; margin: 2rem 0 1rem; }
+h3 { font-size: 1.1rem; margin: 1.5rem 0 .5rem; }
+
+.training-list { list-style: none; padding: 0; margin: 0; }
+.training-list li { padding: .6rem 0; border-bottom: 1px solid #eee; }
+.training-list a { text-decoration: none; font-size: 1.05rem; }
+.training-list a:hover { text-decoration: underline; }
+
+.lesson-list { list-style: none; padding: 0; margin: 0; }
+.lesson-list li {
+  padding: .5rem .75rem;
+  margin-bottom: .25rem;
+  border-radius: 4px;
+  border: 1px solid #e8e8e8;
+  background: #fff;
+}
+.lesson-list li:hover { background: #f0f4ff; }
+.lesson-list li.locked { color: #aaa; background: #f5f5f5; }
+.lesson-list a { text-decoration: none; color: inherit; display: block; }
+
+.lesson-content { margin-top: 1.5rem; }
+.lesson-content img { max-width: 100%; height: auto; border-radius: 4px; }
+.lesson-content p { margin: .75rem 0; }
+
+video, audio { width: 100%; max-width: 860px; margin: 1rem 0; display: block; }
+
+.file-link {
+  display: inline-block;
+  padding: .4rem .9rem;
+  background: #f0f4ff;
+  border: 1px solid #c3d0f8;
+  border-radius: 4px;
+  text-decoration: none;
+  margin: .5rem 0;
+  font-size: .9rem;
+}
+.file-link:hover { background: #dce8ff; }
+
+.media-failed {
+  padding: .75rem;
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 4px;
+  font-size: .9rem;
+  margin: .75rem 0;
+}
+
+.nav-lessons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 3rem;
+  padding-top: 1rem;
+  border-top: 1px solid #ddd;
+  font-size: .9rem;
+}
+.nav-lessons a { text-decoration: none; padding: .4rem .8rem; border: 1px solid #ddd; border-radius: 4px; }
+.nav-lessons a:hover { background: #f0f4ff; }
+
+@media (max-width: 600px) {
+  .nav-lessons { flex-direction: column; gap: .5rem; }
+}

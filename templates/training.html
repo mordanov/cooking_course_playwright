@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% set assets_path = "../" %}
+
+{% block title %}{{ training.title or training.id }}{% endblock %}
+
+{% block header %}
+<div class="breadcrumb"><a href="../index.html">← Все курсы</a></div>
+<h1>{{ training.title or training.id }}</h1>
+{% endblock %}
+
+{% block content %}
+<ul class="lesson-list">
+{% for l in lessons %}
+  <li><a href="{{ l.id }}/index.html">{{ l.title or l.id }}</a></li>
+{% endfor %}
+{% for l in locked %}
+  <li class="locked">🔒 {{ l.title or l.id }} — недоступно</li>
+{% endfor %}
+</ul>
+{% endblock %}
