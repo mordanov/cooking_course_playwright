@@ -101,11 +101,34 @@ def _render_blocks(lesson: dict, lesson_dir: Path) -> list[dict]:
             item = media.get(mid, {})
             lp = item.get("local_path", "")
             done = item.get("status") == "done" and lp and (lesson_dir / lp).exists()
+            text = block.get("text", item.get("filename", "File"))
+            src = ""
+            if done:
+                src = _write_pdf_viewer(lesson_dir, lp, text)
             result.append({
                 "type": "file",
-                "src": lp if done else "",
-                "text": block.get("text", item.get("filename", "File")),
+                "src": src,
+                "text": text,
                 "original_url": item.get("original_url") or item.get("src_url", ""),
                 "failed": not done,
             })
     return result
+
+
+_PDF_VIEWER = """\
+<!doctype html>
+<html><head><meta charset="utf-8"><title>{title}</title>
+<style>html,body,iframe{{margin:0;padding:0;width:100%;height:100%;border:none;overflow:hidden}}</style>
+</head><body><iframe src="{pdf}" style="width:100%;height:100%;border:none"></iframe></body></html>
+"""
+
+
+def _write_pdf_viewer(lesson_dir: Path, lp: str, title: str) -> str:
+    """Write a thin iframe-wrapper page next to the PDF and return its relative path."""
+    fname = Path(lp).name          # e.g. "document.pdf"
+    viewer_path = lesson_dir / (lp + ".html")
+    viewer_path.write_text(
+        _PDF_VIEWER.format(title=title.replace("<", "&lt;"), pdf=fname),
+        encoding="utf-8",
+    )
+    return lp + ".html"            # relative href from lesson/index.html

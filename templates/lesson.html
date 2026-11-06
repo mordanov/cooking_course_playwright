@@ -49,7 +49,7 @@
         <a href="{{ block.original_url }}" target="_blank">Открыть оригинал</a>
       </div>
     {% else %}
-      <a class="file-link" href="{{ block.src }}" download>⬇ {{ block.text }}</a>
+      <a class="file-link" href="{{ block.src }}" target="_blank">⬇ {{ block.text }}</a>
     {% endif %}
   {% endif %}
 {% endfor %}
