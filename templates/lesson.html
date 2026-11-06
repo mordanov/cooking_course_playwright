@@ -10,7 +10,7 @@
 </div>
 <h1>{{ lesson.title or lesson.id }}</h1>
 {% if lesson.description %}
-<p style="color:#555; margin-top:.25rem">{{ lesson.description }}</p>
+<p class="lesson-description">{{ lesson.description }}</p>
 {% endif %}
 {% endblock %}
 

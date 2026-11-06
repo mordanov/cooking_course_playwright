@@ -14,7 +14,7 @@
   <li><a href="{{ l.id }}/index.html">{{ l.title or l.id }}</a></li>
 {% endfor %}
 {% for l in locked %}
-  <li class="locked">🔒 {{ l.title or l.id }} — недоступно</li>
+  <li class="locked">{{ l.title or l.id }} — недоступно</li>
 {% endfor %}
 </ul>
 {% endblock %}
