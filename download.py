@@ -104,7 +104,11 @@ async def run():
             tid = training["id"]
             print(f"\n=== Training {tid} ({training.get('title') or '?'}) ===")
 
-            title, lessons_raw, sub_trainings = await crawler.get_training_info(page, training)
+            try:
+                title, lessons_raw, sub_trainings = await crawler.get_training_info(page, training)
+            except Exception as e:
+                _fail(f"training {tid}", str(e), training.get("url", ""))
+                continue
             if title:
                 training["title"] = title
 
