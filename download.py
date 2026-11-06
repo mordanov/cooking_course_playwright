@@ -166,6 +166,8 @@ async def run():
                         if m.get("local_path")
                     )
                     if files_ok:
+                        if not existing_entry.get("s3_uuid"):
+                            existing_entry["s3_uuid"] = str(uuid.uuid4())
                         print(f"  skip {lid} (already done)")
                         lesson_count += 1
                         continue
