@@ -1,0 +1,15 @@
+FROM python:3.12-slim
+
+WORKDIR /app
+
+COPY server/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY server/main.py .
+
+# offline/ is mounted as a volume at runtime; empty dir is a fallback
+RUN mkdir -p offline
+
+EXPOSE 8000
+
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers"]
