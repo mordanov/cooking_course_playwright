@@ -6,3 +6,4 @@ recon/
 __pycache__/
 *.log
 *.pyc
+upload_media.py

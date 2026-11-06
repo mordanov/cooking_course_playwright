@@ -67,8 +67,17 @@ def _render(env: Environment, template_name: str, out_path: Path, **ctx):
 
 
 def _render_blocks(lesson: dict, lesson_dir: Path) -> list[dict]:
-    """Convert manifest blocks to template-ready dicts with resolved local paths."""
+    """Convert manifest blocks to template-ready dicts with resolved paths.
+
+    When config.S3_MEDIA_BASE_URL is set, video/audio/file src attributes use
+    the public S3 URL ({base}/{s3_uuid}/{local_path}) instead of local relative paths.
+    """
     media = lesson.get("media", {})
+    s3_base = (
+        f"{config.S3_MEDIA_BASE_URL}/{lesson['s3_uuid']}"
+        if config.S3_MEDIA_BASE_URL and lesson.get("s3_uuid")
+        else ""
+    )
     result = []
     for block in lesson.get("blocks", []):
         btype = block["type"]
@@ -79,9 +88,10 @@ def _render_blocks(lesson: dict, lesson_dir: Path) -> list[dict]:
             item = media.get(mid, {})
             lp = item.get("local_path", "")
             done = item.get("status") == "done" and lp and (lesson_dir / lp).exists()
+            src = (f"{s3_base}/{lp}" if s3_base else lp) if done else ""
             result.append({
                 "type": "video",
-                "src": lp if done else "",
+                "src": src,
                 "original_url": item.get("embed_url", ""),
                 "failed": not done,
             })
@@ -90,9 +100,10 @@ def _render_blocks(lesson: dict, lesson_dir: Path) -> list[dict]:
             item = media.get(mid, {})
             lp = item.get("local_path", "")
             done = item.get("status") == "done" and lp and (lesson_dir / lp).exists()
+            src = (f"{s3_base}/{lp}" if s3_base else lp) if done else ""
             result.append({
                 "type": "audio",
-                "src": lp if done else "",
+                "src": src,
                 "original_url": item.get("src_url", ""),
                 "failed": not done,
             })
@@ -104,7 +115,9 @@ def _render_blocks(lesson: dict, lesson_dir: Path) -> list[dict]:
             text = block.get("text", item.get("filename", "File"))
             src = ""
             if done:
-                src = _write_pdf_viewer(lesson_dir, lp, text)
+                # PDF viewer page stays local; its iframe src points to S3 when configured
+                pdf_s3_url = f"{s3_base}/{lp}" if s3_base else ""
+                src = _write_pdf_viewer(lesson_dir, lp, text, pdf_s3_url)
             result.append({
                 "type": "file",
                 "src": src,
@@ -123,12 +136,13 @@ _PDF_VIEWER = """\
 """
 
 
-def _write_pdf_viewer(lesson_dir: Path, lp: str, title: str) -> str:
+def _write_pdf_viewer(lesson_dir: Path, lp: str, title: str, pdf_url: str = "") -> str:
     """Write a thin iframe-wrapper page next to the PDF and return its relative path."""
     fname = Path(lp).name          # e.g. "document.pdf"
     viewer_path = lesson_dir / (lp + ".html")
+    pdf_ref = pdf_url or fname     # absolute S3 URL or local filename
     viewer_path.write_text(
-        _PDF_VIEWER.format(title=title.replace("<", "&lt;"), pdf=fname),
+        _PDF_VIEWER.format(title=title.replace("<", "&lt;"), pdf=pdf_ref),
         encoding="utf-8",
     )
     return lp + ".html"            # relative href from lesson/index.html

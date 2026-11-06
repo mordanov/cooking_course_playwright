@@ -8,6 +8,7 @@ import asyncio
 import json
 import sys
 import time
+import uuid
 from pathlib import Path
 
 sys.stdout.reconfigure(line_buffering=True)
@@ -199,6 +200,8 @@ async def run():
                                 img["status"] = "done"
                                 img["local_path"] = prev_img["local_path"]
 
+                # preserve existing S3 UUID so media URLs don't change on re-parse
+                parsed["s3_uuid"] = (existing_entry or {}).get("s3_uuid") or str(uuid.uuid4())
                 parsed["id"] = lid
                 parsed["training_id"] = tid
                 manifest["lessons"][lid] = parsed
