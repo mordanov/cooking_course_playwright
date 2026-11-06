@@ -124,6 +124,35 @@ async def parse(page: Page, url: str) -> dict:
             continue
 
         # ── HTML block ────────────────────────────────────────────────────────
+        # Extract JS button → Google Drive links BEFORE _clean_block removes scripts.
+        for script in block.select("script"):
+            txt = script.string or ""
+            m = _BTN_URL_RE.search(txt)
+            if not m:
+                continue
+            btn_id, drive_url = m.group(1), m.group(2)
+            if "drive.google.com" not in drive_url:
+                continue
+            btn_el = block.select_one(f"#{btn_id}")
+            btn_text = btn_el.get_text(strip=True) if btn_el else btn_id
+            # Remove the button from HTML; it becomes a dedicated file block.
+            if btn_el:
+                parent = btn_el.find_parent(class_="builder-item") or btn_el
+                parent.decompose()
+            mid = f"file_{file_idx}"
+            file_idx += 1
+            safe = re.sub(r"[^\w.\-]", "_", btn_text.strip())[:60] or f"file_{file_idx}"
+            fname = safe if "." in safe[-6:] else safe + ".pdf"
+            media[mid] = {
+                "type": "file",
+                "src_url": _gdrive_download_url(drive_url),
+                "original_url": drive_url,
+                "filename": fname,
+                "local_path": f"files/{fname}",
+                "status": "pending",
+            }
+            blocks.append({"type": "file", "media_id": mid, "text": btn_text})
+
         _clean_block(block)
         for img in block.select("img"):
             src = img.get("src") or img.get("data-src") or ""
@@ -166,7 +195,7 @@ async def parse(page: Page, url: str) -> dict:
         "title": title,
         "description": description,
         "content_hash": content_hash,
-        "parser_version": 2,   # bump when parse logic changes significantly
+        "parser_version": 3,   # bump when parse logic changes significantly
         "blocks": blocks,
         "media": media,
         "images": images,
@@ -174,6 +203,19 @@ async def parse(page: Page, url: str) -> dict:
 
 
 _FILE_EXTS = {".pdf", ".zip", ".docx", ".xlsx", ".pptx", ".doc", ".xls", ".rar", ".7z", ".mp3", ".wav"}
+
+# Pattern: $('#buttonXXX').click(...window.open('URL')
+_BTN_URL_RE = re.compile(
+    r"""\$\s*\(\s*['"]#(button\w+)['"].*?window\.open\(\s*['"]([^'"]+)['"]""",
+    re.DOTALL,
+)
+
+
+def _gdrive_download_url(url: str) -> str:
+    m = re.search(r"/file/d/([A-Za-z0-9_-]+)", url)
+    if m:
+        return f"https://drive.google.com/uc?id={m.group(1)}&export=download"
+    return url
 
 
 def _is_file_link(href: str) -> bool:

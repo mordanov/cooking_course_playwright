@@ -150,8 +150,8 @@ async def run():
                 existing_entry = manifest["lessons"].get(lid)
 
                 # Skip only when parser version matches AND all media is done AND files exist.
-                # parser_version bump forces a re-parse (e.g. after adding PDF detection).
-                _PARSER_VERSION = 2
+                # parser_version bump forces a re-parse (added Google Drive button detection).
+                _PARSER_VERSION = 3
                 all_done = (
                     existing_entry
                     and existing_entry.get("parser_version") == _PARSER_VERSION

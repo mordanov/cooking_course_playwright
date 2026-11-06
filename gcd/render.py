@@ -105,7 +105,7 @@ def _render_blocks(lesson: dict, lesson_dir: Path) -> list[dict]:
                 "type": "file",
                 "src": lp if done else "",
                 "text": block.get("text", item.get("filename", "File")),
-                "original_url": item.get("src_url", ""),
+                "original_url": item.get("original_url") or item.get("src_url", ""),
                 "failed": not done,
             })
     return result
