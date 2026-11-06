@@ -124,5 +124,9 @@ async def health():
 
 
 _offline = Path("offline")
-if _offline.exists():
+if (_offline / "index.html").exists():
     app.mount("/", StaticFiles(directory=str(_offline), html=True), name="static")
+else:
+    @app.get("/", response_class=HTMLResponse)
+    async def _not_ready():
+        return "<html><body><h2>Сайт готовится к работе. Зайдите позже.</h2></body></html>"
