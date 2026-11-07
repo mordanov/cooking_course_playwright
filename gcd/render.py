@@ -17,6 +17,8 @@ def render_site(manifest: dict):
     assets = config.OUTPUT_DIR / "assets"
     assets.mkdir(parents=True, exist_ok=True)
     shutil.copy(_TMPL_DIR / "style.css", assets / "style.css")
+    shutil.copy(_TMPL_DIR / "favicon.svg", assets / "favicon.svg")
+    shutil.copy(_TMPL_DIR / "apple-touch-icon.png", assets / "apple-touch-icon.png")
 
     trainings = manifest["trainings"]
     lessons_map = manifest["lessons"]

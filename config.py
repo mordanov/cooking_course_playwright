@@ -1,6 +1,9 @@
 import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+load_dotenv()
+
 BASE_URL = "https://course.welldone.study"
 OUTPUT_DIR = Path("offline")
 AUTH_STATE = Path(".auth/state.json")
